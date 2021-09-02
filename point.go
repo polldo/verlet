@@ -1,31 +1,37 @@
-package main
+package verlet
 
 import (
 	"image/color"
 	"math"
-
-	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/imdraw"
-	"golang.org/x/image/colornames"
 )
 
 type Point struct {
-	Fixed       bool
-	Position    pixel.Vec
-	OldPosition pixel.Vec
 	Color       color.RGBA
+	Fixed       bool
+	Position    *Vector
+	OldPosition *Vector
+	Bound       *Vector
+	Gravity     *Vector
+	Friction    float64
 }
 
-func NewPoint(x, y float64, f bool) *Point {
-	pos := pixel.Vec{
-		X: x,
-		Y: y,
-	}
+type PointParams struct {
+	GravityX float64
+	GravityY float64
+	BoundX   float64
+	BoundY   float64
+	Friction float64
+}
+
+func NewPoint(x, y float64, fix bool, c color.RGBA, params *PointParams) *Point {
 	return &Point{
-		Fixed:       f,
-		Position:    pos,
-		OldPosition: pos,
-		Color:       colornames.Orange,
+		Fixed:       fix,
+		Color:       c,
+		Position:    &Vector{X: x, Y: y},
+		OldPosition: &Vector{X: x, Y: y},
+		Bound:       &Vector{X: params.BoundX, Y: params.BoundY},
+		Gravity:     &Vector{X: params.GravityX, Y: params.GravityY},
+		Friction:    params.Friction,
 	}
 }
 
@@ -42,33 +48,26 @@ func (p *Point) Update() {
 	// Retrieve velocity as delta of space
 	vel := p.Position.Sub(p.OldPosition)
 	// Apply friction
-	vel = vel.Scaled(Friction)
-	// fmt.Println(p.Position, p.OldPosition, vel)
+	vel = vel.Scale(p.Friction)
 	p.OldPosition = p.Position
 	// Apply velocity
 	p.Position = p.Position.Add(vel)
 	// Apply gravity
-	p.Position = p.Position.Sub(pixel.V(0, Gravity))
+	p.Position = p.Position.Add(p.Gravity)
 
 	// Check bounds
-	if p.Position.X > windowWidth {
-		p.Position.X = windowWidth
+	if p.Position.X > p.Bound.X {
+		p.Position.X = p.Bound.X
 		p.OldPosition.X = p.Position.X + vel.X
 	} else if p.Position.X < 0 {
 		p.Position.X = 0
 		p.OldPosition.X = p.Position.X + vel.X
 	}
-	if p.Position.Y > windowHeight {
-		p.Position.Y = windowHeight
+	if p.Position.Y > p.Bound.Y {
+		p.Position.Y = p.Bound.Y
 		p.OldPosition.Y = p.Position.Y + vel.Y
 	} else if p.Position.Y < 0 {
 		p.Position.Y = 0
 		p.OldPosition.Y = p.Position.Y + vel.Y
 	}
-}
-
-func (p *Point) Draw(imd *imdraw.IMDraw) {
-	imd.Color = p.Color
-	imd.Push(pixel.V(p.Position.X, p.Position.Y))
-	imd.Circle(5, 0)
 }

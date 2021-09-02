@@ -1,6 +1,8 @@
 package main
 
 import (
+	"verlet"
+
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
 	"github.com/faiface/pixel/pixelgl"
@@ -14,15 +16,14 @@ const (
 
 var (
 	imd    *imdraw.IMDraw
-	points []*Point
-	lines  []*Line
+	points []*verlet.Point
+	lines  []*verlet.Line
 
 	windowWidth  = 1280.
 	windowHeight = 300.
 )
 
 func main() {
-
 	pixelgl.Run(run)
 }
 
@@ -58,19 +59,21 @@ func run() {
 }
 
 func setup() {
-	points = append(points, NewPoint(20, 20, true))
-	points = append(points, NewPoint(55, 55, false))
-	points = append(points, NewPoint(10, 60, false))
-	points = append(points, NewPoint(80, 40, false))
+	p := &verlet.PointParams{0, -0.6, windowWidth, windowHeight, Friction}
+	points = append(points, verlet.NewPoint(20, 20, true, colornames.Orange, p))
+	points = append(points, verlet.NewPoint(55, 55, false, colornames.Orange, p))
+	points = append(points, verlet.NewPoint(10, 60, false, colornames.Orange, p))
+	points = append(points, verlet.NewPoint(80, 40, false, colornames.Orange, p))
 
-	lines = append(lines, NewLine(points[0], points[1]))
-	lines = append(lines, NewLine(points[2], points[3]))
-	lines = append(lines, NewLine(points[1], points[2]))
+	lines = append(lines, verlet.NewLine(points[0], points[1], colornames.Black))
+	lines = append(lines, verlet.NewLine(points[2], points[3], colornames.Black))
+	lines = append(lines, verlet.NewLine(points[1], points[2], colornames.Black))
 }
 
 func update(click *pixel.Vec) {
 	if click != nil {
-		points[0].Position = *click
+		v := verlet.Vector(*click)
+		points[0].Position = &v
 	}
 	for _, p := range points {
 		p.Update()
@@ -80,9 +83,13 @@ func update(click *pixel.Vec) {
 	}
 
 	for _, l := range lines {
-		l.Draw(imd)
+		imd.Color = l.Color
+		imd.Push(pixel.Vec(*l.A.Position), pixel.Vec(*l.B.Position))
+		imd.Line(2)
 	}
 	for _, p := range points {
-		p.Draw(imd)
+		imd.Color = p.Color
+		imd.Push(pixel.V(p.Position.X, p.Position.Y))
+		imd.Circle(5, 0)
 	}
 }
