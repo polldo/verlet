@@ -16,7 +16,7 @@ type Point struct {
 	Friction    float64
 }
 
-type PointParams struct {
+type Params struct {
 	GravityX float64
 	GravityY float64
 	BoundX   float64
@@ -24,7 +24,7 @@ type PointParams struct {
 	Friction float64
 }
 
-func NewPoint(x, y float64, radius float64, fixed bool, c color.RGBA, params *PointParams) *Point {
+func NewPoint(x, y float64, radius float64, fixed bool, c color.RGBA, params *Params) *Point {
 	return &Point{
 		Color:       c,
 		Fixed:       fixed,
