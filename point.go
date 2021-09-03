@@ -8,6 +8,7 @@ import (
 type Point struct {
 	Color       color.RGBA
 	Fixed       bool
+	Radius      float64
 	Position    *Vector
 	OldPosition *Vector
 	Bound       *Vector
@@ -23,10 +24,11 @@ type PointParams struct {
 	Friction float64
 }
 
-func NewPoint(x, y float64, fix bool, c color.RGBA, params *PointParams) *Point {
+func NewPoint(x, y float64, radius float64, fixed bool, c color.RGBA, params *PointParams) *Point {
 	return &Point{
-		Fixed:       fix,
 		Color:       c,
+		Fixed:       fixed,
+		Radius:      radius,
 		Position:    &Vector{X: x, Y: y},
 		OldPosition: &Vector{X: x, Y: y},
 		Bound:       &Vector{X: params.BoundX, Y: params.BoundY},
@@ -56,18 +58,18 @@ func (p *Point) Update() {
 	p.Position = p.Position.Add(p.Gravity)
 
 	// Check bounds
-	if p.Position.X > p.Bound.X {
-		p.Position.X = p.Bound.X
+	if p.Position.X > p.Bound.X-p.Radius {
+		p.Position.X = p.Bound.X - p.Radius
 		p.OldPosition.X = p.Position.X + vel.X
-	} else if p.Position.X < 0 {
-		p.Position.X = 0
+	} else if p.Position.X < 0+p.Radius {
+		p.Position.X = 0 + p.Radius
 		p.OldPosition.X = p.Position.X + vel.X
 	}
-	if p.Position.Y > p.Bound.Y {
-		p.Position.Y = p.Bound.Y
+	if p.Position.Y > p.Bound.Y-p.Radius {
+		p.Position.Y = p.Bound.Y - p.Radius
 		p.OldPosition.Y = p.Position.Y + vel.Y
-	} else if p.Position.Y < 0 {
-		p.Position.Y = 0
+	} else if p.Position.Y < 0+p.Radius {
+		p.Position.Y = 0 + p.Radius
 		p.OldPosition.Y = p.Position.Y + vel.Y
 	}
 }
