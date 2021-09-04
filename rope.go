@@ -1,8 +1,6 @@
 package verlet
 
 import (
-	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/imdraw"
 	"golang.org/x/image/colornames"
 )
 
@@ -34,22 +32,5 @@ func (r *Rope) Update(count int) {
 		for _, l := range r.Lines {
 			l.Update()
 		}
-	}
-}
-
-func (r *Rope) Draw(imd *imdraw.IMDraw) {
-	// for _, p := range r.Points {
-	// 	imd.Color = p.Color
-	// 	imd.Push(pixel.V(p.Position.X, p.Position.Y))
-	// 	imd.Circle(p.Radius, 0)
-	// }
-	imd.Color = r.Head.Color
-	imd.Push(pixel.V(r.Head.Position.X, r.Head.Position.Y))
-	imd.Circle(r.Head.Radius, 0)
-
-	for _, l := range r.Lines {
-		imd.Color = l.Color
-		imd.Push(pixel.Vec(*l.A.Position), pixel.Vec(*l.B.Position))
-		imd.Line(5)
 	}
 }
