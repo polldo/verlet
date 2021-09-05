@@ -2,7 +2,7 @@ package verlet
 
 type Grid struct {
 	*Verlet
-	Head       *Point
+	Origin     *Point
 	Rows, Cols int
 }
 
@@ -19,7 +19,7 @@ func NewGrid(cols, rows int, distance float64, params *VerletParams) *Grid {
 	for i := 0; i < cols; i++ {
 
 		if i == 0 {
-			g.Head = g.NewPoint(x, y, rad, true)
+			g.Origin = g.NewPoint(x, y, rad, true)
 		} else {
 			g.NewPoint(x+float64(i)*distance, y, rad, false)
 			g.NewLine(g.Extract(i, 0), g.Extract(i-1, 0))

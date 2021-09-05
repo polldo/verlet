@@ -33,7 +33,7 @@ func setup() {
 func update(click *pixel.Vec) {
 	if click != nil {
 		v := verlet.Vector(*click)
-		grid.Head.Position = &v
+		grid.Origin.Position = &v
 	}
 
 	grid.Update(6)
