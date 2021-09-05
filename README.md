@@ -1,6 +1,7 @@
 # verlet
 build and animate objects according to verlet physics. pure golang library
-Examples:
+
+Examples depend on [pixel](https://github.com/faiface/pixel) library, see [requirements](https://github.com/faiface/pixel#requirements) to build them:
 <table>
 <tr>
 <td align="center">
