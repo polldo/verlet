@@ -17,7 +17,11 @@ var (
 )
 
 func setup() {
-	p := &verlet.Params{0, -0.8, windowWidth, windowHeight, 0.9}
+	p := &verlet.VerletParams{
+		Gravity:  verlet.Vector{X: 0, Y: -0.8},
+		Bound:    verlet.Vector{X: windowWidth, Y: windowHeight},
+		Friction: 0.9,
+	}
 	rope = verlet.NewRope(20, 20, p)
 }
 
@@ -31,16 +35,17 @@ func update(click *pixel.Vec) {
 
 func draw(imd *imdraw.IMDraw) {
 	// for _, p := range rope.Points {
-	// 	imd.Color = p.Color
+	// 	imd.Color = colornames.Blue
 	// 	imd.Push(pixel.V(p.Position.X, p.Position.Y))
 	// 	imd.Circle(p.Radius, 0)
 	// }
-	imd.Color = rope.Head.Color
+
+	imd.Color = colornames.Orange
 	imd.Push(pixel.V(rope.Head.Position.X, rope.Head.Position.Y))
 	imd.Circle(rope.Head.Radius, 0)
 
 	for _, l := range rope.Lines {
-		imd.Color = l.Color
+		imd.Color = colornames.Orange
 		imd.Push(pixel.Vec(*l.A.Position), pixel.Vec(*l.B.Position))
 		imd.Line(5)
 	}

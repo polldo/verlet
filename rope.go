@@ -1,36 +1,24 @@
 package verlet
 
-import (
-	"golang.org/x/image/colornames"
-)
-
 type Rope struct {
-	Points []*Point
-	Lines  []*Line
-	Head   *Point
+	*Verlet
+	Head *Point
 }
 
-func NewRope(units int, distance float64, params *Params) *Rope {
-	r := &Rope{}
+func NewRope(units int, distance float64, params *VerletParams) *Rope {
+	r := &Rope{
+		Verlet: New(params),
+	}
 
 	rad := 8.
-	r.Head = NewPoint(params.BoundX/2, params.BoundY/2, rad, true, colornames.Orange, params)
-	r.Points = append(r.Points, r.Head)
+	x := params.Bound.X / 2
+	y := params.Bound.Y / 2
+	r.Head = r.NewPoint(x, y, rad, true)
 
 	for i := 1; i < units; i++ {
-		r.Points = append(r.Points, NewPoint(params.BoundX/2, params.BoundY/2-float64(i)*distance, rad, false, colornames.Orange, params))
-		r.Lines = append(r.Lines, NewLine(r.Points[i], r.Points[i-1], colornames.Orange))
+		r.NewPoint(x, y-float64(i)*distance, rad, false)
+		r.NewLine(r.Points[i], r.Points[i-1])
 	}
-	return r
-}
 
-func (r *Rope) Update(count int) {
-	for _, p := range r.Points {
-		p.Update()
-	}
-	for i := 0; i < count; i++ {
-		for _, l := range r.Lines {
-			l.Update()
-		}
-	}
+	return r
 }

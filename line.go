@@ -1,24 +1,9 @@
 package verlet
 
-import (
-	"image/color"
-)
-
 type Line struct {
-	A     *Point
-	B     *Point
-	Len   float64
-	Color color.RGBA
-}
-
-func NewLine(a, b *Point, c color.RGBA) *Line {
-	l := a.Distance(b)
-	return &Line{
-		A:     a,
-		B:     b,
-		Len:   l,
-		Color: c,
-	}
+	A   *Point
+	B   *Point
+	Len float64
 }
 
 func (l *Line) Update() {

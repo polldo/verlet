@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image/color"
 	"verlet"
 
 	"github.com/faiface/pixel"
@@ -17,21 +18,16 @@ var (
 )
 
 func setup() {
-	p := &verlet.Params{0.1, -0.1, windowWidth, windowHeight, 1}
+	p := &verlet.VerletParams{
+		Gravity:  verlet.Vector{X: 0.1, Y: -0.1},
+		Bound:    verlet.Vector{X: windowWidth, Y: windowHeight},
+		Friction: 1,
+	}
 	cols, rows := 3*6, 12
 	dist := 12.
 	grid = verlet.NewGrid(cols, rows, dist, p)
 
-	grid.Points[0][rows-1].Fixed = true
-	for i := range grid.Lines {
-		if i < rows-1+(rows*2-1)*(cols/3) {
-			grid.Lines[i].Color = colornames.Green
-		} else if i < rows-1+(rows-1+rows)*(cols/3*2) {
-			grid.Lines[i].Color = colornames.White
-		} else {
-			grid.Lines[i].Color = colornames.Red
-		}
-	}
+	grid.Extract(0, grid.Rows-1).Fixed = true
 }
 
 func update(click *pixel.Vec) {
@@ -44,10 +40,20 @@ func update(click *pixel.Vec) {
 }
 
 func draw(imd *imdraw.IMDraw) {
-	for _, l := range grid.Lines {
-		imd.Color = l.Color
+	for i, l := range grid.Lines {
+		imd.Color = flagColor(i, grid.Rows, grid.Cols)
 		imd.Push(pixel.Vec(*l.A.Position), pixel.Vec(*l.B.Position))
 		imd.Line(2)
+	}
+}
+
+func flagColor(i, rows, cols int) color.RGBA {
+	if i < rows-1+(rows*2-1)*(cols/3) {
+		return colornames.Green
+	} else if i < rows-1+(rows*2-1)*(cols/3*2) {
+		return colornames.White
+	} else {
+		return colornames.Red
 	}
 }
 
