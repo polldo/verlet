@@ -11,7 +11,8 @@ import (
 )
 
 var (
-	grid *verlet.Grid
+	grid    *verlet.Grid
+	flagMov = 0
 
 	windowWidth  = 800.
 	windowHeight = 300.
@@ -26,17 +27,41 @@ func setup() {
 	cols, rows := 3*6, 12
 	dist := 12.
 	grid = verlet.NewGrid(cols, rows, dist, p)
-
+	grid.Extract(0, 0).Fixed = true
 	grid.Extract(0, grid.Rows-1).Fixed = true
 }
 
-func update(click *pixel.Vec) {
+func update() {
+	grid.Update(6)
+}
+
+func pressed(click *pixel.Vec) {
 	if click != nil {
 		v := verlet.Vector(*click)
-		grid.Origin.Position = &v
-	}
 
-	grid.Update(6)
+		if flagMov == 0 {
+			grid.Origin.Position = &v
+
+		} else if flagMov == 1 {
+			edge := grid.Extract(grid.Cols-1, 0)
+			edge.Fixed = true
+			edge.Position = &v
+
+		} else {
+			up := grid.Extract(0, 0)
+			down := grid.Extract(0, grid.Rows-1)
+			dist := up.Position.Sub(down.Position)
+			up.Position = &v
+			down.Position = up.Position.Sub(dist)
+		}
+	}
+}
+
+func release() {
+	if flagMov == 1 {
+		edge := grid.Extract(grid.Cols-1, 0)
+		edge.Fixed = false
+	}
 }
 
 func draw(imd *imdraw.IMDraw) {
@@ -80,13 +105,15 @@ func run() {
 		win.Clear(colornames.Aliceblue)
 		imd.Clear()
 
-		var click *pixel.Vec = nil
 		if win.Pressed(pixelgl.MouseButtonLeft) {
 			c := win.MousePosition()
-			click = &c
+			pressed(&c)
+		}
+		if win.JustReleased(pixelgl.MouseButtonLeft) {
+			release()
 		}
 
-		update(click)
+		update()
 		draw(imd)
 
 		imd.Draw(win)
