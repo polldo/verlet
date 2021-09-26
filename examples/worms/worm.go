@@ -3,7 +3,8 @@ package main
 import (
 	"math/rand"
 	"time"
-	"verlet"
+
+	"github.com/polldo/verlet"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
