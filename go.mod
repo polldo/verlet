@@ -1,3 +1,3 @@
 module github.com/polldo/verlet
 
-go 1.16
+go 1.19
