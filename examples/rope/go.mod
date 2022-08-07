@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/faiface/pixel v0.10.0
-	github.com/polldo/verlet v0.0.0-20210926113823-d52f7c6d03dd
+	github.com/polldo/verlet v0.0.0-20220807151717-4f1c67ad10c2
 	golang.org/x/image v0.0.0-20210628002857-a66eb6448b8d
 )
 

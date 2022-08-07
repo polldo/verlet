@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/polldo/verlet"
+	"github.com/polldo/verlet/component"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
@@ -10,43 +11,36 @@ import (
 )
 
 var (
-	rope *verlet.Rope
-
 	windowWidth  = 1280.
 	windowHeight = 600.
 )
 
-func setup() {
-	p := &verlet.VerletParams{
-		Gravity:  verlet.Vector{X: 0, Y: -0.8},
-		Bound:    verlet.Vector{X: windowWidth, Y: windowHeight},
-		Friction: 0.9,
-	}
-	rope = verlet.NewRope(20, 20, p)
+func newRope() *component.Rope {
+	return component.NewRope(
+		20,
+		20,
+		verlet.Gravity(0, -0.8),
+		verlet.Bound(windowWidth, windowHeight),
+		verlet.Friction(0.9),
+	)
 }
 
-func update(click *pixel.Vec) {
+func update(click *pixel.Vec, rope *component.Rope) {
 	if click != nil {
 		v := verlet.Vector(*click)
-		rope.Head.Position = &v
+		rope.Head.Position = v
 	}
 	rope.Update(60)
 }
 
-func draw(imd *imdraw.IMDraw) {
-	// for _, p := range rope.Points {
-	// 	imd.Color = colornames.Blue
-	// 	imd.Push(pixel.V(p.Position.X, p.Position.Y))
-	// 	imd.Circle(p.Radius, 0)
-	// }
-
+func draw(imd *imdraw.IMDraw, rope *component.Rope) {
 	imd.Color = colornames.Orange
 	imd.Push(pixel.V(rope.Head.Position.X, rope.Head.Position.Y))
 	imd.Circle(rope.Head.Radius, 0)
 
 	for _, l := range rope.Lines {
 		imd.Color = colornames.Orange
-		imd.Push(pixel.Vec(*l.A.Position), pixel.Vec(*l.B.Position))
+		imd.Push(pixel.Vec(l.A.Position), pixel.Vec(l.B.Position))
 		imd.Line(5)
 	}
 }
@@ -68,7 +62,7 @@ func run() {
 
 	imd := imdraw.New(nil)
 
-	setup()
+	rope := newRope()
 
 	for !win.Closed() {
 		win.Clear(colornames.Aliceblue)
@@ -80,8 +74,8 @@ func run() {
 			click = &c
 		}
 
-		update(click)
-		draw(imd)
+		update(click, rope)
+		draw(imd, rope)
 
 		imd.Draw(win)
 		win.Update()

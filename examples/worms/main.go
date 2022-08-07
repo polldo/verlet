@@ -11,27 +11,20 @@ import (
 )
 
 var (
-	worms []*Worm
-
 	windowWidth  = 1280.
 	windowHeight = 600.
 )
 
 func setup() {
-	rand.Seed(time.Now().UnixNano())
-
-	for i := 0; i < 80; i++ {
-		worms = append(worms, NewWorm())
-	}
 }
 
-func update() {
+func update(worms []*Worm) {
 	for _, w := range worms {
 		w.Update()
 	}
 }
 
-func draw(imd *imdraw.IMDraw) {
+func draw(imd *imdraw.IMDraw, worms []*Worm) {
 	for _, w := range worms {
 		w.Draw(imd)
 	}
@@ -54,14 +47,18 @@ func run() {
 
 	imd := imdraw.New(nil)
 
-	setup()
+	rand.Seed(time.Now().UnixNano())
+	var worms []*Worm
+	for i := 0; i < 80; i++ {
+		worms = append(worms, NewWorm())
+	}
 
 	for !win.Closed() {
 		win.Clear(colornames.Aliceblue)
 		imd.Clear()
 
-		update()
-		draw(imd)
+		update(worms)
+		draw(imd, worms)
 
 		imd.Draw(win)
 		win.Update()

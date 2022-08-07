@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"github.com/polldo/verlet"
+	"github.com/polldo/verlet/component"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
@@ -12,74 +13,73 @@ import (
 )
 
 var (
-	grid    *verlet.Grid
-	flagMov = 0
-
 	windowWidth  = 800.
 	windowHeight = 300.
 )
 
-func setup() {
-	p := &verlet.VerletParams{
-		Gravity:  verlet.Vector{X: 0.1, Y: -0.1},
-		Bound:    verlet.Vector{X: windowWidth, Y: windowHeight},
-		Friction: 1,
-	}
+type moveType int
+
+const (
+	movePoint moveType = iota
+	movePole
+)
+
+// Flag is built on top of a grid component.
+type Flag struct {
+	grid *component.Grid
+	mv   moveType
+}
+
+func newFlag() *Flag {
 	cols, rows := 3*6, 12
 	dist := 12.
-	grid = verlet.NewGrid(cols, rows, dist, p)
+	grid := component.NewGrid(cols, rows, dist, verlet.Gravity(0.1, -0.1), verlet.Bound(windowWidth, windowHeight), verlet.Friction(1))
+
+	// Fix the points attached to the imaginary flagpole.
 	grid.Extract(0, 0).Fixed = true
 	grid.Extract(0, grid.Rows-1).Fixed = true
+	return &Flag{grid: grid, mv: movePole}
 }
 
-func update() {
-	grid.Update(6)
+func (f *Flag) update() {
+	f.grid.Update(6)
 }
 
-func pressed(click *pixel.Vec) {
-	if click != nil {
-		v := verlet.Vector(*click)
+func (f *Flag) move(pos *pixel.Vec) {
+	if pos == nil {
+		return
+	}
+	v := verlet.Vector(*pos)
+	switch f.mv {
 
-		if flagMov == 0 {
-			grid.Origin.Position = &v
+	case movePoint:
+		f.grid.Origin.Position = v
 
-		} else if flagMov == 1 {
-			edge := grid.Extract(grid.Cols-1, 0)
-			edge.Fixed = true
-			edge.Position = &v
-
-		} else {
-			up := grid.Extract(0, 0)
-			down := grid.Extract(0, grid.Rows-1)
-			dist := up.Position.Sub(down.Position)
-			up.Position = &v
-			down.Position = up.Position.Sub(dist)
-		}
+	case movePole:
+		up := f.grid.Extract(0, 0)
+		down := f.grid.Extract(0, f.grid.Rows-1)
+		dist := up.Position.Sub(down.Position)
+		up.Position = v
+		down.Position = up.Position.Sub(dist)
 	}
 }
 
-func release() {
-	if flagMov == 1 {
-		edge := grid.Extract(grid.Cols-1, 0)
-		edge.Fixed = false
-	}
-}
-
-func draw(imd *imdraw.IMDraw) {
-	for i, l := range grid.Lines {
-		imd.Color = flagColor(i, grid.Rows, grid.Cols)
-		imd.Push(pixel.Vec(*l.A.Position), pixel.Vec(*l.B.Position))
-		imd.Line(2)
-	}
-}
-
-func flagColor(i, rows, cols int) color.RGBA {
-	if i < rows-1+(rows*2-1)*(cols/3) {
+func (f *Flag) color(idx int) color.RGBA {
+	rows, cols := f.grid.Rows, f.grid.Cols
+	if idx < rows-1+(rows*2-1)*(cols/3) {
 		return colornames.Green
-	} else if i < rows-1+(rows*2-1)*(cols/3*2) {
+	} else if idx < rows-1+(rows*2-1)*(cols/3*2) {
 		return colornames.White
 	} else {
 		return colornames.Red
+	}
+}
+
+func draw(imd *imdraw.IMDraw, flag *Flag) {
+	for i, l := range flag.grid.Lines {
+		imd.Color = flag.color(i)
+		imd.Push(pixel.Vec(l.A.Position), pixel.Vec(l.B.Position))
+		imd.Line(2)
 	}
 }
 
@@ -100,7 +100,7 @@ func run() {
 
 	imd := imdraw.New(nil)
 
-	setup()
+	flag := newFlag()
 
 	for !win.Closed() {
 		win.Clear(colornames.Aliceblue)
@@ -108,14 +108,11 @@ func run() {
 
 		if win.Pressed(pixelgl.MouseButtonLeft) {
 			c := win.MousePosition()
-			pressed(&c)
-		}
-		if win.JustReleased(pixelgl.MouseButtonLeft) {
-			release()
+			flag.move(&c)
 		}
 
-		update()
-		draw(imd)
+		flag.update()
+		draw(imd, flag)
 
 		imd.Draw(win)
 		win.Update()
