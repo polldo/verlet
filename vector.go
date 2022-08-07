@@ -1,3 +1,4 @@
+// Package verlet contains the basic units to build more complex verlet systems.
 package verlet
 
 // Vector is a simple struct representing a 2d math vector.
