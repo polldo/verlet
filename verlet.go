@@ -22,8 +22,8 @@ func (v *Verlet) NewPoint(x, y float64, radius float64, fixed bool) *Point {
 	p := &Point{
 		Fixed:       fixed,
 		Radius:      radius,
-		Position:    &Vector{X: x, Y: y},
-		OldPosition: &Vector{X: x, Y: y},
+		Position:    Vector{X: x, Y: y},
+		OldPosition: Vector{X: x, Y: y},
 	}
 
 	v.Points = append(v.Points, p)
@@ -44,8 +44,8 @@ func (v *Verlet) NewLine(a, b *Point) *Line {
 
 func (v *Verlet) Update(count int) {
 	for _, p := range v.Points {
-		p.Update(v.Friction, &v.Gravity)
-		p.Bounds(&v.Bound)
+		p.Update(v.Friction, v.Gravity)
+		p.Bounds(v.Bound)
 	}
 	for i := 0; i < count; i++ {
 		for _, l := range v.Lines {

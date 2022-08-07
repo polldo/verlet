@@ -7,8 +7,8 @@ import (
 type Point struct {
 	Fixed       bool
 	Radius      float64
-	Position    *Vector
-	OldPosition *Vector
+	Position    Vector
+	OldPosition Vector
 }
 
 func (p *Point) Distance(other *Point) float64 {
@@ -17,7 +17,7 @@ func (p *Point) Distance(other *Point) float64 {
 	return dist
 }
 
-func (p *Point) Update(friction float64, gravity *Vector) {
+func (p *Point) Update(friction float64, gravity Vector) {
 	if p.Fixed {
 		return
 	}
@@ -32,7 +32,7 @@ func (p *Point) Update(friction float64, gravity *Vector) {
 	p.Position = p.Position.Add(gravity)
 }
 
-func (p *Point) Bounds(bound *Vector) {
+func (p *Point) Bounds(bound Vector) {
 	vel := p.Position.Sub(p.OldPosition)
 	// Check bounds
 	if p.Position.X > bound.X-p.Radius {
