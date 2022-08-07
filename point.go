@@ -4,6 +4,26 @@ import (
 	"math"
 )
 
+type PointOpt func(*Point)
+
+func (p *Point) SetOptions(opts ...PointOpt) {
+	for _, opt := range opts {
+		opt(p)
+	}
+}
+
+func Fix() PointOpt {
+	return func(p *Point) {
+		p.Fixed = true
+	}
+}
+
+func Radius(r float64) PointOpt {
+	return func(p *Point) {
+		p.Radius = r
+	}
+}
+
 type Point struct {
 	Fixed       bool
 	Radius      float64

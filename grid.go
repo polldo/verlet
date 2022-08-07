@@ -6,27 +6,27 @@ type Grid struct {
 	Rows, Cols int
 }
 
-func NewGrid(cols, rows int, distance float64, params *VerletParams) *Grid {
+func NewGrid(cols, rows int, distance float64, opts ...Opt) *Grid {
 	g := &Grid{
-		Verlet: New(params),
+		Verlet: New(opts...),
 		Rows:   rows,
 		Cols:   cols,
 	}
 
 	rad := 2.
-	x := params.Bound.X / 2
-	y := params.Bound.Y / 2
+	x := g.Verlet.Bound.X / 2
+	y := g.Verlet.Bound.Y / 2
 	for i := 0; i < cols; i++ {
 
 		if i == 0 {
-			g.Origin = g.NewPoint(x, y, rad, true)
+			g.Origin = g.NewPoint(x, y, Radius(rad), Fix())
 		} else {
-			g.NewPoint(x+float64(i)*distance, y, rad, false)
+			g.NewPoint(x+float64(i)*distance, y, Radius(rad))
 			g.NewLine(g.Extract(i, 0), g.Extract(i-1, 0))
 		}
 
 		for j := 1; j < rows; j++ {
-			g.NewPoint(x+float64(i)*distance, y-float64(j)*distance, rad, false)
+			g.NewPoint(x+float64(i)*distance, y-float64(j)*distance, Radius(rad))
 			g.NewLine(g.Extract(i, j), g.Extract(i, j-1))
 			if i > 0 {
 				g.NewLine(g.Extract(i, j), g.Extract(i-1, j))

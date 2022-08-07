@@ -1,43 +1,70 @@
 package verlet
 
-type VerletParams struct {
+type Opt func(*Verlet)
+
+// Gravity sets the gravity option for verlet.
+func Gravity(x, y float64) Opt {
+	return func(v *Verlet) {
+		v.Gravity = Vector{X: x, Y: y}
+	}
+}
+
+// Bound sets the bounds option for verlet.
+func Bound(x, y float64) Opt {
+	return func(v *Verlet) {
+		v.Bound = Vector{X: x, Y: y}
+	}
+}
+
+// Friction sets the friction option for verlet.
+func Friction(f float64) Opt {
+	return func(v *Verlet) {
+		v.Friction = f
+	}
+}
+
+type Verlet struct {
+	Points   []*Point
+	Lines    []*Line
 	Gravity  Vector
 	Bound    Vector
 	Friction float64
 }
 
-type Verlet struct {
-	VerletParams
-	Points []*Point
-	Lines  []*Line
+func New(opts ...Opt) *Verlet {
+	v := &Verlet{
+		Gravity:  Vector{X: 0.1, Y: -0.1},
+		Bound:    Vector{X: 100, Y: 100},
+		Friction: 0,
+	}
+	v.SetOptions(opts...)
+	return v
 }
 
-func New(params *VerletParams) *Verlet {
-	return &Verlet{
-		VerletParams: *params,
+func (v *Verlet) SetOptions(opts ...Opt) {
+	for _, opt := range opts {
+		opt(v)
 	}
 }
 
-func (v *Verlet) NewPoint(x, y float64, radius float64, fixed bool) *Point {
+func (v *Verlet) NewPoint(x, y float64, opts ...PointOpt) *Point {
 	p := &Point{
-		Fixed:       fixed,
-		Radius:      radius,
+		Fixed:       false,
+		Radius:      5.0,
 		Position:    Vector{X: x, Y: y},
 		OldPosition: Vector{X: x, Y: y},
 	}
-
+	p.SetOptions(opts...)
 	v.Points = append(v.Points, p)
 	return p
 }
 
 func (v *Verlet) NewLine(a, b *Point) *Line {
-	l := a.Distance(b)
 	ln := &Line{
 		A:   a,
 		B:   b,
-		Len: l,
+		Len: a.Distance(b),
 	}
-
 	v.Lines = append(v.Lines, ln)
 	return ln
 }
