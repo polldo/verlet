@@ -1,14 +1,16 @@
-package verlet
+package component
+
+import "github.com/polldo/verlet"
 
 type Grid struct {
-	*Verlet
-	Origin     *Point
+	*verlet.Verlet
+	Origin     *verlet.Point
 	Rows, Cols int
 }
 
-func NewGrid(cols, rows int, distance float64, opts ...Opt) *Grid {
+func NewGrid(cols, rows int, distance float64, opts ...verlet.Opt) *Grid {
 	g := &Grid{
-		Verlet: New(opts...),
+		Verlet: verlet.New(opts...),
 		Rows:   rows,
 		Cols:   cols,
 	}
@@ -19,14 +21,14 @@ func NewGrid(cols, rows int, distance float64, opts ...Opt) *Grid {
 	for i := 0; i < cols; i++ {
 
 		if i == 0 {
-			g.Origin = g.NewPoint(x, y, Radius(rad), Fix())
+			g.Origin = g.NewPoint(x, y, verlet.Radius(rad), verlet.Fix())
 		} else {
-			g.NewPoint(x+float64(i)*distance, y, Radius(rad))
+			g.NewPoint(x+float64(i)*distance, y, verlet.Radius(rad))
 			g.NewLine(g.Extract(i, 0), g.Extract(i-1, 0))
 		}
 
 		for j := 1; j < rows; j++ {
-			g.NewPoint(x+float64(i)*distance, y-float64(j)*distance, Radius(rad))
+			g.NewPoint(x+float64(i)*distance, y-float64(j)*distance, verlet.Radius(rad))
 			g.NewLine(g.Extract(i, j), g.Extract(i, j-1))
 			if i > 0 {
 				g.NewLine(g.Extract(i, j), g.Extract(i-1, j))
@@ -37,7 +39,7 @@ func NewGrid(cols, rows int, distance float64, opts ...Opt) *Grid {
 	return g
 }
 
-func (g *Grid) Extract(col, row int) *Point {
+func (g *Grid) Extract(col, row int) *verlet.Point {
 	idx := g.MatrixToArray(col, row)
 	return g.Points[idx]
 }
